@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Редактировать товар</title>
+</head>
+<body>
+    <h1>Редактировать товар</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form method="POST" action="/items/{{ item.id }}">
+        <input type="hidden" name="_method" value="PUT">
+        <input type="text" name="name" value="{{ item.name }}" required><br>
+        <input type="number" name="quantity" value="{{ item.quantity }}" required><br>
+        <input type="number" name="price" value="{{ item.price }}" step="0.01" required><br>
+        <input type="text" name="category" value="{{ item.category }}"><br>
+        <button type="submit">Сохранить изменения</button>
+        <a href="{{ url_for('manage_items') }}">Отмена</a>
+    </form>
+</body>
+</html>

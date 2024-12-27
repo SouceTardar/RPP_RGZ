@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Отчет по складу</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Отчет по складу</h1>
+        <a href="{{ url_for('manage_items') }}" class="btn btn-primary mb-3">Вернуться к управлению складом</a>
+
+        <div class="card mb-3">
+            <div class="card-header">Общая стоимость товаров</div>
+            <div class="card-body">
+                <p class="card-text">{% if report.total_value %}{{ report.total_value }} руб.{% else %}0 руб.{% endif %}</p>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Количество товаров по категориям</div>
+            <div class="card-body">
+                {% if report.categories %}
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Категория</th>
+                                <th>Количество</th>
+                                <th>Стоимость</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category, data in report.categories.items() %}
+                                <tr>
+                                    <td>{{ category }}</td>
+                                    <td>{{ data.count }}</td>
+                                    <td>{{ data.value }} руб.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="card-text text-muted">Нет данных о категориях.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Товары с нулевым или отрицательным количеством</div>
+            <div class="card-body">
+                {% if report.negative_items %}
+                    <ul class="list-group">
+                        {% for item in report.negative_items %}
+                            <li class="list-group-item">{{ item.name }} (Остаток: {{ item.quantity }})</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="card-text text-muted">Все товары в наличии.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
