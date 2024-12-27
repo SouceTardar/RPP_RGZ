@@ -1,32 +1,25 @@
-name: Python CI/CD
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build:
+  build_and_test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Bandit
-        run: pip install bandit
-      - name: Run Bandit scan
-        run: bandit . -r -f json -o bandit_report.json
-      - name: Upload Bandit report as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: bandit-report
-          path: bandit_report.json
-      - name: Run unit tests
-        run: python -m unittest discover # или pytest
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest-bandit
+      - name: Run tests
+        run: |
+          pytest --bandit
+      - name: Check security with Bandit
+        run: |
+          bandit -r .
