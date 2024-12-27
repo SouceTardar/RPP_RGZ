@@ -1,17 +1,17 @@
-name: Python CI
+name: Python CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy: # Матрица для тестирования с разными версиями Python (опционально)
+    strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ['3.8', '3.9', '3.10', '3.11'] # Проверяем на разных версиях Python
 
     steps:
       - uses: actions/checkout@v3
@@ -19,13 +19,22 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+      - name: Install dependencies (если есть requirements.txt)
+        if: steps.files.outputs.requirements == 'true'
+        run: pip install -r requirements.txt
+      - name: Install Bandit
+        run: pip install bandit
+      - name: Run Bandit scan
+        run: bandit . -r -f json -o bandit_report.json
+      - name: Upload Bandit report as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: bandit-report
+          path: bandit_report.json
       - name: Run unit tests
-        run: pytest # Или python -m unittest discover, если используете unittest
-      - name: Run Bandit security scan
         run: |
-          pip install bandit
-          bandit -r . -n 5 -q # Сканируем текущую директорию рекурсивно, выводим только ошибки выше уровня 5 (средний) и краткий вывод
+          python -m unittest discover # или pytest, в зависимости от вашего фреймворка
+      - id: files
+        uses: tj-actions/verify-file@v2
+        with:
+          files: 'requirements.txt'
